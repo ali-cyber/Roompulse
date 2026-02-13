@@ -57,14 +57,17 @@ export default function RoomView() {
       if (res.ok) setAgg(data);
     })();
   }, [roomId]);
+  
+useEffect(() => {
+  if (!roomId) return;
+  const socket: Socket = io(WS_URL, { transports: ["websocket"] });
+  socket.emit("joinRoom", roomId);
+  socket.on("aggregate", (payload: Agg) => setAgg(payload));
+  return () => {
+    socket.disconnect();
+  };
+}, [roomId]);
 
-  useEffect(() => {
-    if (!roomId) return;
-    const socket: Socket = io(WS_URL, { transports: ["websocket"] });
-    socket.emit("joinRoom", roomId);
-    socket.on("aggregate", (payload: Agg) => setAgg(payload));
-    return () => socket.disconnect();
-  }, [roomId]);
 
   useEffect(() => {
     const t = setInterval(() => {
